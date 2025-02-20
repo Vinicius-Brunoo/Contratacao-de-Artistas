@@ -9,6 +9,7 @@ function App() {
   const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [artistaSelecionado, setArtistaSelecionado] = useState(null);
+  const [showRegistered, setShowRegistered] = useState(false);
   const navigate = useNavigate();
 
   const getSpotifyToken = async () => {
@@ -99,7 +100,7 @@ function App() {
       <div className="row justify-content-center mb-5">
         <div className="col-12 col-md-8 text-center">
           <h1 className="display-4 mb-4">Pesquisar Artistas</h1>
-          <div className="search-container d-flex gap-2 justify-content-center">
+          <div className="search-container d-flex gap-2 justify-content-center mb-3">
             <input
               type="text"
               className="form-control form-control-lg w-75"

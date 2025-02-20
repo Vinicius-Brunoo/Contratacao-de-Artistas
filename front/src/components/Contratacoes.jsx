@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Contratacoes() {
   const [contratacoes, setContratacoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchContratacoes = async () => {
@@ -42,6 +44,12 @@ function Contratacoes() {
   return (
     <div className="container py-5">
       <h1 className="text-center mb-5">Contratações Realizadas</h1>
+      <button 
+        className="btn btn-primary mb-4" 
+        onClick={() => navigate('/')}
+      >
+        Voltar à Tela Inicial
+      </button>
       
       {contratacoes.length === 0 ? (
         <div className="alert alert-info text-center">
@@ -65,7 +73,7 @@ function Contratacoes() {
                     </p>
                     <p className="mb-2">
                       <i className="bi bi-calendar-event me-2"></i>
-                      <strong>Data:</strong> {new Date(contrato.data_evento).toLocaleDateString()}
+                      <strong>Data:</strong> {new Date(contrato.dataEvento).toLocaleDateString()}
                     </p>
                     <p className="mb-0">
                       <i className="bi bi-geo-alt-fill me-2"></i>

@@ -1,25 +1,25 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import App from "./App"; // Página principal de pesquisa de artistas
-import ContratacaoForm from "./components/ContratacaoForm"; // Formulário de contratação
-import Sucesso from "./Sucesso"; // Página de sucesso após contratação
-import Contratacoes from "./components/Contratacoes"; // Página de consulta de contratações
+import App from "./App"; // Main artist search page
+import ContratacaoForm from "./components/ContratacaoForm"; // Hiring form
+import Sucesso from "./Sucesso"; // Success page after hiring
+import Contratacoes from "./components/Contratacoes"; // Hiring inquiry page
 
 function Main() {
   return (
     <Router>
       <Routes>
-        {/* Rota principal (pesquisa de artistas) */}
+        {/* Main route (artist search) */}
         <Route path="/" element={<App />} />
 
-        {/* Rota do formulário de contratação */}
+        {/* Hiring form route */}
         <Route path="/contratar" element={<ContratacaoForm />} />
 
-        {/* Rota de sucesso após contratação */}
+        {/* Path to success after hiringo */}
         <Route path="/sucesso" element={<Sucesso />} />
 
-        {/* Rota de consulta de contratações */}
+        {/* Hiring inquiry route */}
         <Route path="/contratacoes" element={<Contratacoes />} />
       </Routes>
     </Router>

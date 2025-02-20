@@ -4,26 +4,29 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { createContratacao } from '../api';
+import dayjs from 'dayjs';
 
-const schema = yup.object().shape({
-    nome: yup.string().required('Nome é obrigatório'),
-    cache: yup
-        .number()
-        .typeError('Cachê deve ser um número')
-        .required('Cachê é obrigatório')
-        .positive('Cachê deve ser positivo'),
-    dataEvento: yup
-        .date()
-        .typeError('Data inválida')
-        .required('Data do evento é obrigatória')
-        .min(new Date(), 'Data deve ser futura'),
-    endereco: yup.string().required('Endereço é obrigatório'),
-});
-
-function ContratacaoForm() {
-    const location = useLocation();
+const ContratacaoForm = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const artist = location.state?.artist;
+
+    const schema = yup.object().shape({
+        nome: yup.string().required('Nome é obrigatório'),
+        cache: yup
+            .number()
+            .typeError('Cachê deve ser um número')
+            .required('Cachê é obrigatório')
+            .positive('Cachê deve ser positivo'),
+        dataEvento: yup
+            .string()
+            .required('Data do evento é obrigatória')
+            .test('valid-date', 'Data inválida', (value) => dayjs(value, 'YYYY-MM-DD', true).isValid())
+            .test('future-date', 'Data deve ser futura', (value) => 
+                dayjs(value, 'YYYY-MM-DD', true).isValid() && dayjs(value, 'YYYY-MM-DD', true).isAfter(dayjs())
+            ),
+        endereco: yup.string().required('Endereço é obrigatório'),
+    });
 
     const {
         register,
@@ -36,10 +39,16 @@ function ContratacaoForm() {
     const onSubmit = async (data) => {
         console.log('Dados do formulário:', data);
         try {
+            const dataFormatada = dayjs(data.dataEvento, 'YYYY-MM-DD', true).isValid()
+                ? dayjs(data.dataEvento).format('YYYY-MM-DD')
+                : null;
+
             await createContratacao({
                 ...data,
+                dataEvento: dataFormatada,
                 artista: artist.name,
             });
+
             navigate('/sucesso');
         } catch (error) {
             console.error('Erro ao criar contratação:', error);
@@ -127,6 +136,6 @@ function ContratacaoForm() {
             </div>
         </div>
     );
-}
+};
 
 export default ContratacaoForm;
