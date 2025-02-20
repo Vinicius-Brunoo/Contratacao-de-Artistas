@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Contratacao;
 
+
 class ContratacaoController extends Controller
 {
     public function store(Request $request)
@@ -17,5 +18,6 @@ class ContratacaoController extends Controller
     {
         $contratacoes = Contratacao::all();
         return response()->json($contratacoes);
+        return Contratacao::with('artist')->get();
     }
 }

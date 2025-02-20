@@ -13,4 +13,11 @@ class Contratacao extends Model
         'dataEvento',
         'endereco'
     ];
+        protected $casts = [
+            'data' => 'date:Y-m-d',
+            'artist' => 'array'
+
+    ];
+
+    
 }
