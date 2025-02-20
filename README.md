@@ -69,7 +69,7 @@ Entre na pasta do frontend e instale as dependências:
 ```bash
  cd ../front
  npm install
- cp .env.example .env
+ cp .env
 ```
 
 Edite o `.env` para configurar a URL da API Laravel e credenciais da API do Spotify.
