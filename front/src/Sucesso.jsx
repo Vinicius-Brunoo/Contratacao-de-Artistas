@@ -16,6 +16,7 @@ function Sucesso() {
           >
             Voltar à página inicial
           </button>
+          
           <button
             className="btn btn-outline-success btn-lg"
             onClick={() => navigate("/contratacoes")}
