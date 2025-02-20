@@ -4,14 +4,15 @@ import "./App.css";
 import ContratacaoForm from "./components/ContratacaoForm";
 
 function App() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredArtists, setFilteredArtists] = useState([]);
-  const [accessToken, setAccessToken] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [artistaSelecionado, setArtistaSelecionado] = useState(null);
-  const [showRegistered, setShowRegistered] = useState(false);
+  // State variables
+  const [searchTerm, setSearchTerm] = useState(""); // Stores the search input
+  const [filteredArtists, setFilteredArtists] = useState([]); // Stores the search results
+  const [accessToken, setAccessToken] = useState(null); // Stores the Spotify API token
+  const [loading, setLoading] = useState(false); // Loading state for search
+  const [artistaSelecionado, setArtistaSelecionado] = useState(null); // Stores selected artist
   const navigate = useNavigate();
 
+  // Function to get Spotify API token
   const getSpotifyToken = async () => {
     const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
     const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
@@ -31,11 +32,12 @@ function App() {
       const data = await response.json();
       return data.access_token;
     } catch (error) {
-      console.error('Erro ao obter token:', error);
+      console.error('Error fetching token:', error);
       return null;
     }
   };
 
+  // Function to search for artists
   const searchArtists = async () => {
     if (!searchTerm) return;
     setLoading(true);
@@ -50,18 +52,19 @@ function App() {
         }
       );
 
-      if (!response.ok) throw new Error("Erro ao buscar artistas");
+      if (!response.ok) throw new Error("Error fetching artists");
 
       const data = await response.json();
       setFilteredArtists(data.artists.items);
     } catch (error) {
-      console.error("Erro:", error);
+      console.error("Error:", error);
       setFilteredArtists([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // Effect to trigger search with debounce
   useEffect(() => {
     if (searchTerm) {
       const delayDebounce = setTimeout(() => {
@@ -74,37 +77,41 @@ function App() {
     }
   }, [searchTerm]);
 
+  // Effect to initialize Spotify API token
   useEffect(() => {
     const initializeToken = async () => {
       const token = await getSpotifyToken();
       if (token) {
         setAccessToken(token);
       } else {
-        console.error('Não foi possível obter o token');
+        console.error('Failed to obtain token');
       }
     };
 
     initializeToken();
   }, []);
 
+  // Function to navigate to the hiring page
   const handleContratar = (artist) => {
     navigate('/contratar', { state: { artist } });
   };
 
+  // Display loading message if accessToken is not yet available
   if (!accessToken) {
-    return <p>Carregando...</p>;
+    return <p>Loading...</p>;
   }
 
   return (
     <div className="container py-5">
+      {/* Search Section */}
       <div className="row justify-content-center mb-5">
         <div className="col-12 col-md-8 text-center">
-          <h1 className="display-4 mb-4">Pesquisar Artistas</h1>
+          <h1 className="display-4 mb-4">Search Artists</h1>
           <div className="search-container d-flex gap-2 justify-content-center mb-3">
             <input
               type="text"
               className="form-control form-control-lg w-75"
-              placeholder="Digite o nome do artista..."
+              placeholder="Enter artist name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -113,12 +120,13 @@ function App() {
               onClick={searchArtists} 
               disabled={loading}
             >
-              {loading ? "Pesquisando..." : "Pesquisar"}
+              {loading ? "Searching..." : "Search"}
             </button>
           </div>
         </div>
       </div>
 
+      {/* Artists List */}
       <div className="row g-4">
         {filteredArtists.length > 0 ? (
           filteredArtists.map((artist) => (
@@ -136,7 +144,7 @@ function App() {
                     className="btn btn-primary mt-auto"
                     onClick={() => handleContratar(artist)}
                   >
-                    Contratar
+                    Hire
                   </button>
                 </div>
               </div>
@@ -144,11 +152,12 @@ function App() {
           ))
         ) : (
           <div className="col-12 text-center">
-            <p className="text-muted fs-5">Nenhum artista encontrado.</p>
+            <p className="text-muted fs-5">No artists found.</p>
           </div>
         )}
       </div>
 
+      {/* Hiring Form */}
       {artistaSelecionado && (
         <ContratacaoForm
           artist={artistaSelecionado}

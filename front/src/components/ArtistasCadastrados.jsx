@@ -12,6 +12,7 @@ function ArtistasCadastrados() {
     buscarArtistasCadastrados();
   }, []);
 
+  // Fetch artists from the API
   const buscarArtistasCadastrados = async () => {
     try {
       setLoading(true);
@@ -25,10 +26,12 @@ function ArtistasCadastrados() {
     }
   };
 
+  // Navigate back
   const handleVoltar = () => {
     navigate(-1);
   };
 
+  // Navigate to artist details page
   const handleDetalhes = (artistaId) => {
     if (artistaId) {
       navigate(`/artista/${artistaId}`);
@@ -60,11 +63,13 @@ function ArtistasCadastrados() {
     );
   }
 
+  // Component to render artist list
   const ArtistasLista = ({ artistas }) => (
     <div className="row g-4">
       {artistas.map((artista) => (
         <div key={artista.id} className="col-12 col-sm-6 col-md-4 col-lg-3">
           <div className="card h-100 shadow-sm">
+            {/* Artist image */}
             <img
               src={artista.artist?.images[0]?.url || "https://via.placeholder.com/150"}
               className="card-img-top"
@@ -72,6 +77,7 @@ function ArtistasCadastrados() {
               style={{ height: '200px', objectFit: 'cover' }}
             />
             <div className="card-body">
+              {/* Artist name */}
               <h5 className="card-title">{artista.artist?.name}</h5>
               <p className="card-text">
                 <small className="text-muted">Local: {artista.local}</small>

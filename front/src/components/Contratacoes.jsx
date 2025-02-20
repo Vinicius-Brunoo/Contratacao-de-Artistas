@@ -3,28 +3,28 @@ import { useNavigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Contratacoes() {
-  const [contratacoes, setContratacoes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [contratacoes, setContratacoes] = useState([]); // State to store fetched contracts
+  const [loading, setLoading] = useState(true); // Loading state for data fetching
+  const [error, setError] = useState(null); // State for handling errors
+  const navigate = useNavigate(); // Hook for navigation
 
   useEffect(() => {
     const fetchContratacoes = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/contratacoes');
+        const response = await fetch('http://localhost:8000/api/contratacoes'); // Fetch contracts from API
         if (!response.ok) {
-          throw new Error('Falha ao carregar contratações');
+          throw new Error('Falha ao carregar contratações'); 
         }
         const data = await response.json();
-        setContratacoes(data);
+        setContratacoes(data); // Store the fetched contracts in state
       } catch (err) {
-        setError(err.message);
+        setError(err.message); // Capture and store the error message
       } finally {
-        setLoading(false);
+        setLoading(false); // Ensure loading state is set to false after request
       }
     };
 
-    fetchContratacoes();
+    fetchContratacoes(); // Fetch contracts on component mount
   }, []);
 
   if (loading) return (

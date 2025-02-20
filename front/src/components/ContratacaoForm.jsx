@@ -9,8 +9,9 @@ import dayjs from 'dayjs';
 const ContratacaoForm = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const artist = location.state?.artist;
+    const artist = location.state?.artist; // Retrieve artist details from navigation state
 
+    // Validation schema for form inputs
     const schema = yup.object().shape({
         nome: yup.string().required('Nome é obrigatório'),
         cache: yup
@@ -28,6 +29,7 @@ const ContratacaoForm = () => {
         endereco: yup.string().required('Endereço é obrigatório'),
     });
 
+    // React Hook Form setup with Yup validation
     const {
         register,
         handleSubmit,
@@ -36,6 +38,7 @@ const ContratacaoForm = () => {
         resolver: yupResolver(schema),
     });
 
+    // Form submission handler
     const onSubmit = async (data) => {
         console.log('Dados do formulário:', data);
         try {
@@ -49,14 +52,14 @@ const ContratacaoForm = () => {
                 artista: artist.name,
             });
 
-            navigate('/sucesso');
+            navigate('/sucesso'); 
         } catch (error) {
             console.error('Erro ao criar contratação:', error);
         }
     };
 
     if (!artist) {
-        navigate('/');
+        navigate('/'); 
         return null;
     }
 
