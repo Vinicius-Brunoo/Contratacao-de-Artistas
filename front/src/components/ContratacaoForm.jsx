@@ -1,7 +1,9 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { createContratacao } from '../api';
 
 const schema = yup.object().shape({
     nome: yup.string().required('Nome é obrigatório'),
@@ -18,89 +20,113 @@ const schema = yup.object().shape({
     endereco: yup.string().required('Endereço é obrigatório'),
 });
 
-const ContratacaoForm = ({ artist, onSubmit }) => {
+function ContratacaoForm() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const artist = location.state?.artist;
+
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm({
-        resolver: yupResolver(schema), 
-    });
-
-    const onFormSubmit = (data) => {
-        onSubmit({ ...data, artista: artist.name }); 
-    };
-
-    return (
-        <form onSubmit={handleSubmit(onFormSubmit)}>
-            <div>
-                <input
-                    {...register('nome')}
-                    placeholder="Nome"
-                />
-                {errors.nome && <span>{errors.nome.message}</span>}
-            </div>
-
-            <div>
-                <input
-                    {...register('cache')}
-                    placeholder="Cachê"
-                    type="number"
-                />
-                {errors.cache && <span>{errors.cache.message}</span>}
-            </div>
-
-            <div>
-                <input
-                    {...register('dataEvento')}
-                    placeholder="Data do Evento"
-                    type="date"
-                />
-                {errors.dataEvento && <span>{errors.dataEvento.message}</span>}
-            </div>
-
-            <div>
-                <input
-                    {...register('endereco')}
-                    placeholder="Endereço"
-                />
-                {errors.endereco && <span>{errors.endereco.message}</span>}
-            </div>
-
-            <button type="submit">Enviar</button>
-        </form>
-    );
-
-const ContratacaoForm = ({ artist, onSubmit }) => {
-    const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(schema),
     });
 
-    const onFormSubmit = (data) => {
-        onSubmit(data);
+    const onSubmit = async (data) => {
+        console.log('Dados do formulário:', data);
+        try {
+            await createContratacao({
+                ...data,
+                artista: artist.name,
+            });
+            navigate('/sucesso');
+        } catch (error) {
+            console.error('Erro ao criar contratação:', error);
+        }
     };
 
+    if (!artist) {
+        navigate('/');
+        return null;
+    }
+
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)}>
-            <input {...register('nome')} placeholder="Nome" />
-            {errors.nome && <span>{errors.nome.message}</span>}
+        <div className="container py-5">
+            <div className="row justify-content-center">
+                <div className="col-12 col-md-8 col-lg-6">
+                    <div className="card shadow">
+                        <div className="card-body">
+                            <h1 className="text-center mb-4">Contratar {artist.name}</h1>
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <div className="mb-3">
+                                    <input
+                                        {...register('nome')}
+                                        placeholder="Nome do Contratante"
+                                        className={`form-control ${errors.nome ? 'is-invalid' : ''}`}
+                                    />
+                                    {errors.nome && 
+                                        <div className="invalid-feedback">{errors.nome.message}</div>
+                                    }
+                                </div>
 
-            <input {...register('artista')} placeholder="Artista" value={artist.name} readOnly />
-            {errors.artista && <span>{errors.artista.message}</span>}
+                                <div className="mb-3">
+                                    <input
+                                        {...register('cache')}
+                                        placeholder="Cachê"
+                                        type="number"
+                                        className={`form-control ${errors.cache ? 'is-invalid' : ''}`}
+                                    />
+                                    {errors.cache && 
+                                        <div className="invalid-feedback">{errors.cache.message}</div>
+                                    }
+                                </div>
 
-            <input {...register('cache')} placeholder="Cachê" type="number" />
-            {errors.cache && <span>{errors.cache.message}</span>}
+                                <div className="mb-3">
+                                    <input
+                                        {...register('dataEvento')}
+                                        placeholder="Data do Evento"
+                                        type="date"
+                                        className={`form-control ${errors.dataEvento ? 'is-invalid' : ''}`}
+                                    />
+                                    {errors.dataEvento && 
+                                        <div className="invalid-feedback">{errors.dataEvento.message}</div>
+                                    }
+                                </div>
 
-            <input {...register('data_evento')} placeholder="Data do Evento" type="date" />
-            {errors.data_evento && <span>{errors.data_evento.message}</span>}
+                                <div className="mb-3">
+                                    <input
+                                        {...register('endereco')}
+                                        placeholder="Endereço"
+                                        className={`form-control ${errors.endereco ? 'is-invalid' : ''}`}
+                                    />
+                                    {errors.endereco && 
+                                        <div className="invalid-feedback">{errors.endereco.message}</div>
+                                    }
+                                </div>
 
-            <input {...register('endereco')} placeholder="Endereço" />
-            {errors.endereco && <span>{errors.endereco.message}</span>}
-
-            <button type="submit">Enviar</button>
-        </form>
+                                <div className="d-grid gap-2">
+                                    <button 
+                                        type="submit" 
+                                        className="btn btn-primary btn-lg"
+                                    >
+                                        Confirmar Contratação
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-secondary"
+                                        onClick={() => navigate('/')}
+                                    >
+                                        Voltar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
-};
-};
+}
 
 export default ContratacaoForm;

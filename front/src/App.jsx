@@ -1,13 +1,39 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./App.css";
-import FormularioContratacao from "./components/FormularioContratacao";
+import ContratacaoForm from "./components/ContratacaoForm";
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredArtists, setFilteredArtists] = useState([]);
-  const [accessToken, setAccessToken] = useState("");
+  const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [artistaSelecionado, setArtistaSelecionado] = useState(null);
+  const navigate = useNavigate();
+
+  const getSpotifyToken = async () => {
+    const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+    const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
+
+    try {
+      const response = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Basic ' + btoa(`${clientId}:${clientSecret}`),
+        },
+        body: new URLSearchParams({
+          grant_type: 'client_credentials',
+        }),
+      });
+
+      const data = await response.json();
+      return data.access_token;
+    } catch (error) {
+      console.error('Erro ao obter token:', error);
+      return null;
+    }
+  };
 
   const searchArtists = async () => {
     if (!searchTerm) return;
@@ -17,7 +43,9 @@ function App() {
       const response = await fetch(
         `https://api.spotify.com/v1/search?q=${encodeURIComponent(searchTerm)}&type=artist`,
         {
-          headers: { Authorization: `Bearer ${accessToken}` },
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
@@ -34,88 +62,103 @@ function App() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("spotifyAccessToken");
-    if (token) setAccessToken(token);
+    if (searchTerm) {
+      const delayDebounce = setTimeout(() => {
+        searchArtists();
+      }, 500);
+
+      return () => clearTimeout(delayDebounce);
+    } else {
+      setFilteredArtists([]);
+    }
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const initializeToken = async () => {
+      const token = await getSpotifyToken();
+      if (token) {
+        setAccessToken(token);
+      } else {
+        console.error('Não foi possível obter o token');
+      }
+    };
+
+    initializeToken();
   }, []);
 
+  const handleContratar = (artist) => {
+    navigate('/contratar', { state: { artist } });
+  };
+
+  if (!accessToken) {
+    return <p>Carregando...</p>;
+  }
+
   return (
-    <div className="container">
-      <h1>Pesquisar Artistas</h1>
-      <div className="search-container">
-        <input
-          type="text"
-          placeholder="Digite o nome do artista..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button onClick={searchArtists} disabled={loading}>
-          {loading ? "Pesquisando..." : "Pesquisar"}
-        </button>
+    <div className="container py-5">
+      <div className="row justify-content-center mb-5">
+        <div className="col-12 col-md-8 text-center">
+          <h1 className="display-4 mb-4">Pesquisar Artistas</h1>
+          <div className="search-container d-flex gap-2 justify-content-center">
+            <input
+              type="text"
+              className="form-control form-control-lg w-75"
+              placeholder="Digite o nome do artista..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button 
+              className={`btn ${loading ? 'btn-secondary' : 'btn-primary'} btn-lg`}
+              onClick={searchArtists} 
+              disabled={loading}
+            >
+              {loading ? "Pesquisando..." : "Pesquisar"}
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="results-grid">
+      <div className="row g-4">
         {filteredArtists.length > 0 ? (
           filteredArtists.map((artist) => (
-            <div key={artist.id} className="artist-card">
-              <img
-                src={artist.images[0]?.url || "https://via.placeholder.com/150"}
-                alt={artist.name}
-              />
-              <p>{artist.name}</p>
-              <button onClick={() => setArtistaSelecionado(artist)}>Contratar</button>
+            <div key={artist.id} className="col-12 col-sm-6 col-md-4 col-lg-3">
+              <div className="card h-100 shadow-sm">
+                <img
+                  src={artist.images[0]?.url || "https://via.placeholder.com/150"}
+                  className="card-img-top"
+                  alt={artist.name}
+                  style={{ height: '200px', objectFit: 'cover' }}
+                />
+                <div className="card-body d-flex flex-column">
+                  <h5 className="card-title text-center mb-3">{artist.name}</h5>
+                  <button 
+                    className="btn btn-primary mt-auto"
+                    onClick={() => handleContratar(artist)}
+                  >
+                    Contratar
+                  </button>
+                </div>
+              </div>
             </div>
           ))
         ) : (
-          <p>Nenhum artista encontrado.</p>
+          <div className="col-12 text-center">
+            <p className="text-muted fs-5">Nenhum artista encontrado.</p>
+          </div>
         )}
       </div>
 
       {artistaSelecionado && (
-        <FormularioContratacao
-          artistaSelecionado={artistaSelecionado}
-          onClose={() => setArtistaSelecionado(null)}
+        <ContratacaoForm
+          artist={artistaSelecionado}
+          onSubmit={(data) => {
+            console.log(data);
+            setArtistaSelecionado(null);
+          }}
         />
       )}
     </div>
   );
-
-  const contratarArtista = async (artista) => {
-    const nomeContratante = prompt("Digite seu nome para contratar o artista:");
-    const cache = prompt("Digite o cachê (opcional):");
-    const dataEvento = prompt("Digite a data do evento (YYYY-MM-DD):");
-    const endereco = prompt("Digite o endereço (opcional):");
-  
-    if (!nomeContratante || !dataEvento) {
-      alert("Nome e data do evento são obrigatórios.");
-      return;
-    }
-  
-    const dados = {
-      nome: nomeContratante,
-      artista: artista.name,
-      cache: cache || null,
-      data_evento: dataEvento,
-      endereco: endereco || null,
-    };
-  
-    try {
-      const response = await fetch("http://localhost:8000/api/contratar", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dados),
-      });
-  
-      const resultado = await response.json();
-      alert(resultado.message);
-    } catch (error) {
-      console.error("Erro ao contratar artista:", error);
-      alert("Erro ao contratar o artista.");
-    }
-  };
-  
-
 }
 
 export default App;
