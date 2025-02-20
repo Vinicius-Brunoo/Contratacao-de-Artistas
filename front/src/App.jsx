@@ -4,12 +4,12 @@ import "./App.css";
 import ContratacaoForm from "./components/ContratacaoForm";
 
 function App() {
-  // State variables
-  const [searchTerm, setSearchTerm] = useState(""); // Stores the search input
-  const [filteredArtists, setFilteredArtists] = useState([]); // Stores the search results
-  const [accessToken, setAccessToken] = useState(null); // Stores the Spotify API token
-  const [loading, setLoading] = useState(false); // Loading state for search
-  const [artistaSelecionado, setArtistaSelecionado] = useState(null); // Stores selected artist
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredArtists, setFilteredArtists] = useState([]);
+  const [accessToken, setAccessToken] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [artistaSelecionado, setArtistaSelecionado] = useState(null);
+  const [showRegistered, setShowRegistered] = useState(false);
   const navigate = useNavigate();
 
   // Function to get Spotify API token
@@ -32,7 +32,7 @@ function App() {
       const data = await response.json();
       return data.access_token;
     } catch (error) {
-      console.error('Error fetching token:', error);
+      console.error('Erro ao obter token:', error);
       return null;
     }
   };
@@ -52,18 +52,17 @@ function App() {
         }
       );
 
-      if (!response.ok) throw new Error("Error fetching artists");
+      if (!response.ok) throw new Error("Erro ao buscar artistas");
 
       const data = await response.json();
       setFilteredArtists(data.artists.items);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Erro:", error);
       setFilteredArtists([]);
     } finally {
       setLoading(false);
     }
   };
-
   // Effect to trigger search with debounce
   useEffect(() => {
     if (searchTerm) {
@@ -84,12 +83,13 @@ function App() {
       if (token) {
         setAccessToken(token);
       } else {
-        console.error('Failed to obtain token');
+        console.error('Não foi possível obter o token');
       }
     };
 
     initializeToken();
   }, []);
+
 
   // Function to navigate to the hiring page
   const handleContratar = (artist) => {
@@ -98,20 +98,19 @@ function App() {
 
   // Display loading message if accessToken is not yet available
   if (!accessToken) {
-    return <p>Loading...</p>;
+    return <p>Carregando...</p>;
   }
 
   return (
     <div className="container py-5">
-      {/* Search Section */}
       <div className="row justify-content-center mb-5">
         <div className="col-12 col-md-8 text-center">
-          <h1 className="display-4 mb-4">Search Artists</h1>
+          <h1 className="display-4 mb-4">Pesquisar Artistas</h1>
           <div className="search-container d-flex gap-2 justify-content-center mb-3">
             <input
               type="text"
               className="form-control form-control-lg w-75"
-              placeholder="Enter artist name..."
+              placeholder="Digite o nome do artista..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -120,13 +119,12 @@ function App() {
               onClick={searchArtists} 
               disabled={loading}
             >
-              {loading ? "Searching..." : "Search"}
+              {loading ? "Pesquisando..." : "Pesquisar"}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Artists List */}
       <div className="row g-4">
         {filteredArtists.length > 0 ? (
           filteredArtists.map((artist) => (
@@ -144,7 +142,7 @@ function App() {
                     className="btn btn-primary mt-auto"
                     onClick={() => handleContratar(artist)}
                   >
-                    Hire
+                    Contratar
                   </button>
                 </div>
               </div>
@@ -152,12 +150,11 @@ function App() {
           ))
         ) : (
           <div className="col-12 text-center">
-            <p className="text-muted fs-5">No artists found.</p>
+            <p className="text-muted fs-5">Nenhum artista encontrado.</p>
           </div>
         )}
       </div>
 
-      {/* Hiring Form */}
       {artistaSelecionado && (
         <ContratacaoForm
           artist={artistaSelecionado}
