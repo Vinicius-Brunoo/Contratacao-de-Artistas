@@ -99,7 +99,6 @@ Durante o processo seletivo da EnterScience, as variáveis de ambiente já estã
 
 ### Variáveis do Frontend:
 
-- `GRANT_TYPE`
 - `CLIENT_ID`
 - `CLIENT_SECRET`
 
