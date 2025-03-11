@@ -63,6 +63,7 @@ function App() {
       setLoading(false);
     }
   };
+
   // Effect to trigger search with debounce
   useEffect(() => {
     if (searchTerm) {
@@ -90,7 +91,6 @@ function App() {
     initializeToken();
   }, []);
 
-
   // Function to navigate to the hiring page
   const handleContratar = (artist) => {
     navigate('/contratar', { state: { artist } });
@@ -114,9 +114,9 @@ function App() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button 
+            <button
               className={`btn ${loading ? 'btn-secondary' : 'btn-primary'} btn-lg`}
-              onClick={searchArtists} 
+              onClick={searchArtists}
               disabled={loading}
             >
               {loading ? "Pesquisando..." : "Pesquisar"}
@@ -138,7 +138,7 @@ function App() {
                 />
                 <div className="card-body d-flex flex-column">
                   <h5 className="card-title text-center mb-3">{artist.name}</h5>
-                  <button 
+                  <button
                     className="btn btn-primary mt-auto"
                     onClick={() => handleContratar(artist)}
                   >
@@ -153,6 +153,15 @@ function App() {
             <p className="text-muted fs-5">Nenhum artista encontrado.</p>
           </div>
         )}
+      </div>
+
+      <div>
+        <button
+          className="btn btn-outline-success btn-lg"
+          onClick={() => navigate("/contratacoes")}
+        >
+          Ver contratações
+        </button>
       </div>
 
       {artistaSelecionado && (

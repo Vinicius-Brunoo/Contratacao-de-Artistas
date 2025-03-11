@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { createContratacao } from '../api';
 import dayjs from 'dayjs';
+import axios from 'axios';
 
 const ContratacaoForm = () => {
     const navigate = useNavigate();
@@ -33,10 +34,35 @@ const ContratacaoForm = () => {
     const {
         register,
         handleSubmit,
+        setValue,
         formState: { errors },
     } = useForm({
         resolver: yupResolver(schema),
     });
+
+    const [cep, setCep] = useState('');
+    const [cepError, setCepError] = useState('');
+
+    // Function to handle the CEP lookup
+    const handleCepChange = async (e) => {
+        const value = e.target.value;
+        setCep(value);
+
+        if (value.length === 8) { // When the CEP is 8 digits
+            try {
+                const response = await axios.get(`https://viacep.com.br/ws/${value}/json/`);
+                if (response.data.erro) {
+                    setCepError('CEP não encontrado');
+                    setValue('endereco', '');
+                } else {
+                    setCepError('');
+                    setValue('endereco', `${response.data.logradouro}, ${response.data.bairro}, ${response.data.localidade} - ${response.data.uf}`);
+                }
+            } catch (error) {
+                setCepError('Erro ao buscar CEP');
+            }
+        }
+    };
 
     // Form submission handler
     const onSubmit = async (data) => {
@@ -104,6 +130,18 @@ const ContratacaoForm = () => {
                                     {errors.dataEvento && 
                                         <div className="invalid-feedback">{errors.dataEvento.message}</div>
                                     }
+                                </div>
+
+                                <div className="mb-3">
+                                    <input
+                                        {...register('cep')}
+                                        placeholder="CEP"
+                                        type="text"
+                                        value={cep}
+                                        onChange={handleCepChange}
+                                        className={`form-control ${cepError ? 'is-invalid' : ''}`}
+                                    />
+                                    {cepError && <div className="invalid-feedback">{cepError}</div>}
                                 </div>
 
                                 <div className="mb-3">
